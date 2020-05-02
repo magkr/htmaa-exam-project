@@ -2,7 +2,7 @@
 // Define stepper motor connections and steps per revolution:
 #define dirPin 2
 #define stepPin 3
-#define stepsPerRevolution 200
+#define stepsPerRevolution 400
 void setup() {
   // Declare pins as output:
   pinMode(stepPin, OUTPUT);
@@ -20,6 +20,7 @@ void loop() {
     delayMicroseconds(2000);
   }
   delay(1000);
+  /*
   // Set the spinning direction counterclockwise:
   digitalWrite(dirPin, LOW);
   // Spin the stepper motor 1 revolution quickly:
@@ -52,5 +53,5 @@ void loop() {
     digitalWrite(stepPin, LOW);
     delayMicroseconds(500);
   }
-  delay(1000);
+  delay(1000); */
 }
