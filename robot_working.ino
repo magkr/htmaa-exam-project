@@ -2,6 +2,7 @@
 #include <CheapStepper.h>
 CheapStepper right (6,7,8,9); 
 CheapStepper left (10,11,12,13); 
+boolean clockwise = false;
 
 //Pump
 #define pumpDir 2
@@ -22,6 +23,7 @@ Servo Arm;
 #define waterSensor A0
 #define moistureSensor A1
 
+
 int totalPlants = 5;
 int currentPlant = 0;
 
@@ -41,6 +43,20 @@ void setup() {
 }
 
 void loop() {
+  lowerArm();
+  int moisture = analogRead(moistureSensor);
+  Serial.println(moisture);
+  /*
+  while(true){
+    for(int i = 0; i < 10; i++){
+      pump();  
+    }
+    int moisture = analogRead(moistureSensor);
+    Serial.println(moisture);
+    
+  }
+  */
+  /*
   int water_level = analogRead(waterSensor);
   Serial.println(water_level);
   if(water_level < 100){
@@ -50,33 +66,36 @@ void loop() {
     moveOn();
     visitPlant();
   }
+   */
+  
 }
 
 void moveOn(){
   while(!plantNearby()){
-    drive(true);
+    drive();
   } 
 }
 
 void visitPlant(){
   turnLeft();
   while(!plantNearby()){
-    drive(true);
+    drive();
   }
   waterPlant();
   currentPlant += 1;
   while(!plantNearby()){
-    drive(false);
+    reverse();
   }
   turnBackToLine();
 }
 
 void waterPlant(){
-  int moisture = analogRead(moistureSensor);
+  //lower arm
+  int moisture = 1; //analogRead(moistureSensor);
   lowerArm();
-  while(moisture < 300){
+  while(moisture < 10){
     pump();
-    moisture = analogRead(moistureSensor);
+    moisture += 1; //analogRead(moistureSensor);
   }
   liftArm();
 }
@@ -86,31 +105,47 @@ void pump(){
 }
 
 bool plantNearby(){
+  //a line that meets 
   return (analogRead(IR_Left) < 500 && analogRead(IR_Right) < 500);
 }
 
-void drive(bool forward){
+void drive(){
   //printing values of the sensors to the serial monitor
   Serial.println(analogRead(IR_Left));
   Serial.println(analogRead(IR_Right));
   
   if(analogRead(IR_Left) > 500 && analogRead(IR_Right) < 500){
-    right.move(forward, 20);
+    right.move(clockwise, 20);
   } else if(analogRead(IR_Left) < 500 && analogRead(IR_Right) > 500){
-    left.move(forward, 20);
+    left.move(clockwise, 20);
   } else if(analogRead(IR_Left) > 500 && analogRead(IR_Right) > 500){
-    right.move(forward, 20);
-    left.move(forward, 20);
+    right.move(clockwise, 20);
+    left.move(clockwise, 20);
+  }
+}
+
+void reverse(){
+  //printing values of the sensors to the serial monitor
+  Serial.println(analogRead(IR_Left));
+  Serial.println(analogRead(IR_Right));
+  
+  if(analogRead(IR_Left) > 500 && analogRead(IR_Right) < 500){
+    right.move(!clockwise, 20);
+  } else if(analogRead(IR_Left) < 500 && analogRead(IR_Right) > 500){
+    left.move(!clockwise, 20);
+  } else if(analogRead(IR_Left) > 500 && analogRead(IR_Right) > 500){
+    right.move(!clockwise, 20);
+    left.move(!clockwise, 20);
   }
 }
 
 void turnLeft(){
-  right.move(false, 4000);
+  right.move(clockwise, 4000);
   delay(1000);  
 }
 
 void turnBackToLine(){
-  right.move(true, 4000);
+  right.move(!clockwise, 4000);
   delay(1000); 
 }
 
@@ -126,7 +161,7 @@ void liftArm(){
 
 void returnHome(){
   while(currentPlant < totalPlants){
-    while(!plantNearby){ drive(true); }
+    while(!plantNearby){ drive(); }
     currentPlant += 1;
   }
   reload();
