@@ -109,6 +109,11 @@ void turnLeft(){
   delay(1000);  
 }
 
+void turnRight(){
+  left.move(false, 4000);
+  delay(1000);  
+}
+
 void turnBackToLine(){
   right.move(true, 4000);
   delay(1000); 
@@ -125,13 +130,27 @@ void liftArm(){
 }
 
 void returnHome(){
+  //drive past remaining plant
   while(currentPlant < totalPlants){
     while(!plantNearby){ drive(true); }
     currentPlant += 1;
   }
+  //drive until we meet the watertower
+  while(!plantNearby()){
+    drive(true);
+  }
+  turnRight();
   reload();
 }
 
 void reload(){
-    
+  int water_level = analogRead(waterSensor);
+  while(water_level > 600){
+    drive(false);
+    water_level = analogRead(waterSensor);
+  }
+  while(!plantNearby()){
+    drive(true);
+  }
+  turnLeft();
 }
